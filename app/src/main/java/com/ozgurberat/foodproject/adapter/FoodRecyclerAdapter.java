@@ -17,6 +17,7 @@ import com.ozgurberat.foodproject.R;
 import com.ozgurberat.foodproject.model.Food;
 import com.ozgurberat.foodproject.util.GlideHelper;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class FoodRecyclerAdapter extends RecyclerView.Adapter<FoodRecyclerAdapter.FoodCardViewHolder> {
@@ -40,23 +41,6 @@ public class FoodRecyclerAdapter extends RecyclerView.Adapter<FoodRecyclerAdapte
         foods.clear();
         foods.addAll(foodsList);
         notifyDataSetChanged();
-    }
-
-    class FoodCardViewHolder extends RecyclerView.ViewHolder {
-
-        CardView foodCard;
-        ImageView foodImage;
-        TextView foodName;
-        AppCompatImageButton saveButton;
-
-        public FoodCardViewHolder(@NonNull View itemView) {
-            super(itemView);
-
-            foodCard = itemView.findViewById(R.id.food_card);
-            foodImage = itemView.findViewById(R.id.food_image);
-            foodName = itemView.findViewById(R.id.food_name);
-            saveButton = itemView.findViewById(R.id.food_save_button);
-        }
     }
 
     @NonNull
@@ -89,12 +73,28 @@ public class FoodRecyclerAdapter extends RecyclerView.Adapter<FoodRecyclerAdapte
                 foodViewListener.onSaveClicked(foods.get(position));
             }
         });
-
     }
 
     @Override
     public int getItemCount() {
         return foods.size();
+    }
+
+    class FoodCardViewHolder extends RecyclerView.ViewHolder {
+
+        CardView foodCard;
+        ImageView foodImage;
+        TextView foodName;
+        AppCompatImageButton saveButton;
+
+        public FoodCardViewHolder(@NonNull View itemView) {
+            super(itemView);
+
+            foodCard = itemView.findViewById(R.id.food_card);
+            foodImage = itemView.findViewById(R.id.food_image);
+            foodName = itemView.findViewById(R.id.food_name);
+            saveButton = itemView.findViewById(R.id.food_save_button);
+        }
     }
 
 }

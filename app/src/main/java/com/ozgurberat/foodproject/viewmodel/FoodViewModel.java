@@ -1,25 +1,30 @@
 package com.ozgurberat.foodproject.viewmodel;
 
+import android.app.Application;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.ozgurberat.foodproject.model.Recipe;
 import com.ozgurberat.foodproject.repositories.FoodRepository;
 import com.ozgurberat.foodproject.requests.responses.FoodResponse;
 
-public class FoodViewModel extends ViewModel {
+import java.util.List;
 
-    private static final String TAG = "FoodViewModel";
+public class FoodViewModel extends AndroidViewModel {
 
     private FoodRepository repository;
 
-    public FoodViewModel() {
-        repository = FoodRepository.getInstance();
+    public FoodViewModel(@NonNull Application application) {
+        super(application);
+        repository = FoodRepository.getInstance(application);
     }
 
     public void fetchFoods(String category) {
-        Log.d(TAG, "fetchFoods: called in ViewModel.");
         repository.fetchFoods(category);
     }
 
@@ -27,21 +32,26 @@ public class FoodViewModel extends ViewModel {
         repository.fetchQueriedFoods(query);
     }
 
-    public MutableLiveData<FoodResponse> getFoodList() {
-        Log.d(TAG, "observeFoods: called in ViewModel.");
+    public void fetchRecipeForResult(String mealId) {
+        repository.fetchRecipeForResult(mealId);
+    }
+
+    public LiveData<FoodResponse> getFoodList() {
         return repository.getFoodList();
     }
 
-    public MutableLiveData<FoodResponse> getQueriedFoods() {
+    public LiveData<FoodResponse> getQueriedFoods() {
         return repository.getQueriedFoods();
     }
 
-    public MutableLiveData<Boolean> getIsLoading() {
+    public LiveData<Boolean> getIsLoading() {
         return repository.getIsLoading();
     }
 
-    public MutableLiveData<Boolean> getIsTimedOut() {
+    public LiveData<Boolean> getIsTimedOut() {
         return repository.getIsTimedOut();
     }
+
+    public LiveData<Recipe> getRecipeFromSQLite() { return repository.getRecipeFromSQLite(); }
 
 }

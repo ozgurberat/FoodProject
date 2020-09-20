@@ -1,22 +1,17 @@
 package com.ozgurberat.foodproject.model;
 
-import androidx.room.ColumnInfo;
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 import com.google.gson.annotations.SerializedName;
 
-@Entity(tableName = "recipes_table")
+@Entity(tableName = "recipe_table")
 public class Recipe {
 
-    public int getSqliteId() {
-        return sqliteId;
-    }
-
-    @PrimaryKey(autoGenerate = true)
-    public int sqliteId; // Private gives an error about Room. Idk why.
-
+    @PrimaryKey
     @SerializedName("idMeal")
+    @NonNull
     private String mealId;
 
     @SerializedName("strMeal")

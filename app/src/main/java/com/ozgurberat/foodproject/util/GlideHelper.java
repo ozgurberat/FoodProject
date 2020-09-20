@@ -20,7 +20,7 @@ public class GlideHelper {
     public static RequestOptions setRequestOptions(Context context, boolean isCircle) {
         RequestOptions requestOptions = new RequestOptions();
         requestOptions = requestOptions
-                .error(R.drawable.ic_launcher_background)
+                .error(R.drawable.no_image_available)
                 .placeholder(createCircularProgressBar(context));
 
         if (isCircle) {

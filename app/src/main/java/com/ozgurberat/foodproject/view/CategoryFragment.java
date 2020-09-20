@@ -1,7 +1,6 @@
 package com.ozgurberat.foodproject.view;
 
-import android.content.res.TypedArray;
-import android.graphics.Color;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -19,7 +18,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,11 +32,12 @@ import com.ozgurberat.foodproject.requests.responses.CategoryResponse;
 import com.ozgurberat.foodproject.viewmodel.CategoryViewModel;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class CategoryFragment extends Fragment implements CategoryRecyclerAdapter.CategoryViewListener {
     private static final String TAG = "CategoryFragment";
 
-    private CategoryViewModel viewModel;
+    private CategoryViewModel categoryViewModel;
     private CategoryRecyclerAdapter adapter;
     private RecyclerView recyclerView;
 
@@ -52,30 +51,28 @@ public class CategoryFragment extends Fragment implements CategoryRecyclerAdapte
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        categoryViewModel = new ViewModelProvider(this).get(CategoryViewModel.class);
+
         initRecycler(view);
         inflateToolbarMenu(view);
 
-
-        viewModel = new ViewModelProvider(this).get(CategoryViewModel.class);
-        viewModel.fetchCategories(); // fetch category list when the view is created
+        categoryViewModel.fetchCategoriesFromSQLite();
         subscribeObservers(); // observe live data
-
 
         SwipeRefreshLayout swipeRefreshLayout = view.findViewById(R.id.category_swipe_refresh_layout);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                viewModel.fetchCategories();
-                Toast.makeText(getContext(), "Fetched From API in CategoryFragment", Toast.LENGTH_SHORT).show();
+                categoryViewModel.fetchCategories();
+//                Toast.makeText(getContext(), "Fetched From API in CategoryFragment", Toast.LENGTH_SHORT).show();
                 swipeRefreshLayout.setRefreshing(false);
             }
         });
 
-
     }
 
     private void subscribeObservers() {
-        viewModel.getCategoryList().observe(getViewLifecycleOwner(), new Observer<CategoryResponse>() {
+        categoryViewModel.getCategoryList().observe(getViewLifecycleOwner(), new Observer<CategoryResponse>() {
             @Override
             public void onChanged(CategoryResponse categoryResponse) {
                 if (categoryResponse != null && categoryResponse.getCategories() != null && categoryResponse.getCategories().size() > 0) {
@@ -83,12 +80,24 @@ public class CategoryFragment extends Fragment implements CategoryRecyclerAdapte
                     showRecycler(true);
                 }
                 else {
-                    Log.d(TAG, "onChanged: null value in CategoryFragment.");
+                    Log.d(TAG, "onChanged: CategoryFragment: NULL.");
                     showRecycler(false);
                 }
             }
         });
 
+        categoryViewModel.getCategoriesFromSQLite().observe(getViewLifecycleOwner(), new Observer<List<Category>>() {
+            @Override
+            public void onChanged(List<Category> categories) {
+                if (categories != null && categories.size() > 0) {
+                    adapter.updateData(categories);
+//                    Toast.makeText(getContext(), "Fetched From SQLite in CategoryFragment", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    categoryViewModel.fetchCategories();
+                }
+            }
+        });
     }
 
     private void showRecycler(boolean visibility) {
@@ -123,6 +132,16 @@ public class CategoryFragment extends Fragment implements CategoryRecyclerAdapte
             @Override
             public boolean onQueryTextChange(String newText) {
                 return false;
+            }
+        });
+
+        MenuItem saveItem = menu.findItem(R.id.action_save);
+        saveItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                Intent intent = new Intent(getActivity(), SavedRecipeActivity.class);
+                startActivity(intent);
+                return true;
             }
         });
 

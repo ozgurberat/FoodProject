@@ -1,37 +1,51 @@
 package com.ozgurberat.foodproject.viewmodel;
 
-import android.content.Context;
+import android.app.Application;
 
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
 
 import com.ozgurberat.foodproject.model.Recipe;
 import com.ozgurberat.foodproject.repositories.RecipeRepository;
 import com.ozgurberat.foodproject.requests.responses.RecipeResponse;
 
-public class RecipeViewModel extends ViewModel {
+
+public class RecipeViewModel extends AndroidViewModel {
 
     private RecipeRepository repository;
 
-    public RecipeViewModel() {
-        repository = RecipeRepository.getInstance();
+    public RecipeViewModel(@NonNull Application application) {
+        super(application);
+        repository = RecipeRepository.getInstance(application);
     }
 
     public void fetchRecipe(String id) {
         repository.fetchRecipe(id);
     }
 
-    public MutableLiveData<RecipeResponse> getRecipe() {
+    public void fetchRecipeFromSQLite(String id) {
+        repository.fetchRecipeFromSQLite(id);
+    }
+
+    public void triggerGetRecipe(RecipeResponse recipeResponse) {
+        repository.triggerGetRecipe(recipeResponse);
+    }
+
+    public LiveData<RecipeResponse> getRecipe() {
         return repository.getRecipe();
     }
 
-    public MutableLiveData<Boolean> getIsLoading() {
+    public LiveData<Boolean> getIsLoading() {
         return repository.getIsLoading();
     }
 
-    public MutableLiveData<Boolean> getIsTimedOut() {
+    public LiveData<Boolean> getIsTimedOut() {
         return repository.getIsTimedOut();
     }
 
+    public LiveData<Recipe> getRecipeFromSQLite() {
+        return repository.getRecipeFromSQLite();
+    }
 
 }

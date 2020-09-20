@@ -1,10 +1,13 @@
 package com.ozgurberat.foodproject.view;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
@@ -21,13 +24,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 import com.ozgurberat.foodproject.R;
 import com.ozgurberat.foodproject.adapter.FoodRecyclerAdapter;
 import com.ozgurberat.foodproject.model.Food;
+import com.ozgurberat.foodproject.model.Recipe;
 import com.ozgurberat.foodproject.requests.responses.FoodResponse;
 import com.ozgurberat.foodproject.viewmodel.FoodViewModel;
 
@@ -36,7 +42,7 @@ import java.util.ArrayList;
 public class FoodFragment extends Fragment implements FoodRecyclerAdapter.FoodViewListener {
     private static final String TAG = "FoodFragment";
 
-    private FoodViewModel viewModel;
+    private FoodViewModel foodViewModel;
 
     private RecyclerView recyclerView;
     private FoodRecyclerAdapter adapter;
@@ -45,6 +51,9 @@ public class FoodFragment extends Fragment implements FoodRecyclerAdapter.FoodVi
 
     private String category;
     private String query;
+
+    private String foodIdForRetry;
+    private boolean forAlertDialogAndSnackbar;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -57,26 +66,27 @@ public class FoodFragment extends Fragment implements FoodRecyclerAdapter.FoodVi
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        foodViewModel = new ViewModelProvider(this).get(FoodViewModel.class);
+
+        forAlertDialogAndSnackbar = false;
+
         initRecycler(view);
         inflateToolbarMenu(view);
-
-        nullResponseText = view.findViewById(R.id.error_message_text);
-        nullResponseImage = view.findViewById(R.id.error_image);
-
-        viewModel = new ViewModelProvider(this).get(FoodViewModel.class);
+        initViews(view);
 
         if (getArguments() != null) {
-
             //  Deciding which request we need to send in the background. If the bundle is sent for 'category',
             //only the category request will happen. Same thing happens with 'query'.
             category = getArguments().getString("category");
             if (category != null && !category.equals("")) {
-                viewModel.fetchFoods(category);
+                foodViewModel.fetchFoods(category);
+//                Toast.makeText(getContext(), "Fetched From API in FoodFragment", Toast.LENGTH_SHORT).show();
             }
 
             query = getArguments().getString("query"); //
             if (query != null && !query.equals("")) {
-                viewModel.fetchQueriedFoods(query);
+                foodViewModel.fetchQueriedFoods(query);
+//                Toast.makeText(getContext(), "Fetched From API in FoodFragment", Toast.LENGTH_SHORT).show();
             }
 
         }
@@ -88,28 +98,27 @@ public class FoodFragment extends Fragment implements FoodRecyclerAdapter.FoodVi
             @Override
             public void onRefresh() {
                 if (getArguments() != null) {
-
                     category = getArguments().getString("category");
-                    String queryText = getArguments().getString("query");
-                    if (queryText != null && !queryText.equals("")) {
-                        query = queryText; // set the new query
-                    }
                     if (query != null && !query.equals("")) {
-                        viewModel.fetchQueriedFoods(query);
+                        foodViewModel.fetchQueriedFoods(query);
                     }
                     else
-                        viewModel.fetchFoods(category);
-
+                        foodViewModel.fetchFoods(category);
                 }
-                Toast.makeText(getContext(), "Fetched From API in FoodFragment", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getContext(), "Fetched From API in FoodFragment", Toast.LENGTH_SHORT).show();
                 swipeRefreshLayout.setRefreshing(false);
             }
         });
 
     }
 
+    private void initViews(View view) {
+        nullResponseText = view.findViewById(R.id.error_message_text);
+        nullResponseImage = view.findViewById(R.id.error_image);
+    }
+
     private void subscribeObservers() {
-        viewModel.getFoodList().observe(getViewLifecycleOwner(), new Observer<FoodResponse>() {
+        foodViewModel.getFoodList().observe(getViewLifecycleOwner(), new Observer<FoodResponse>() {
             @Override
             public void onChanged(FoodResponse foodResponse) {
                 if (foodResponse != null && foodResponse.getFoods() != null) {
@@ -127,7 +136,7 @@ public class FoodFragment extends Fragment implements FoodRecyclerAdapter.FoodVi
             }
         });
 
-        viewModel.getQueriedFoods().observe(getViewLifecycleOwner(), new Observer<FoodResponse>() {
+        foodViewModel.getQueriedFoods().observe(getViewLifecycleOwner(), new Observer<FoodResponse>() {
             @Override
             public void onChanged(FoodResponse foodResponse) {
                 if (foodResponse != null && foodResponse.getFoods() != null) {
@@ -145,6 +154,56 @@ public class FoodFragment extends Fragment implements FoodRecyclerAdapter.FoodVi
             }
         });
 
+        foodViewModel.getRecipeFromSQLite().observe(getViewLifecycleOwner(), new Observer<Recipe>() {
+            @Override
+            public void onChanged(Recipe recipe) {
+                if (recipe != null) {
+                    if (forAlertDialogAndSnackbar) {
+                        Snackbar snackbar = Snackbar.make(getView(),"SUCCESS!\nSaved: "+recipe.getMealName(), BaseTransientBottomBar.LENGTH_LONG);
+                        snackbar.setTextColor(Color.CYAN);
+                        snackbar.show();
+                    }
+
+                }
+                else {
+                    if (forAlertDialogAndSnackbar) {
+                        showAlertDialog();
+                    }
+                }
+            }
+        });
+
+    }
+
+    private AlertDialog createAlertDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Slow Connection");
+        builder.setMessage("Recipe could not save.Do you wanna try again?");
+        builder.setPositiveButton("RETRY", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                foodViewModel.fetchRecipeForResult(foodIdForRetry);
+                dialogInterface.dismiss();
+            }
+        });
+        builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+                dialogInterface.dismiss();
+            }
+        });
+        AlertDialog alertDialog = builder.create();
+        return alertDialog;
+    }
+
+    private void showAlertDialog() {
+        AlertDialog alertDialog = createAlertDialog();
+        alertDialog.show();
+        Button buttonPositive = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        buttonPositive.setTextColor(ContextCompat.getColor(getActivity().getApplicationContext(), R.color.RED));
+        Button buttonNegative = alertDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+        buttonNegative.setTextColor(ContextCompat.getColor(getActivity().getApplicationContext(), R.color.RED));
     }
 
     private void hideRecycler() {
@@ -180,7 +239,7 @@ public class FoodFragment extends Fragment implements FoodRecyclerAdapter.FoodVi
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String queryText) {
-                viewModel.fetchQueriedFoods(queryText);
+                foodViewModel.fetchQueriedFoods(queryText);
                 query = queryText;
                 searchView.clearFocus();
                 return true;
@@ -192,6 +251,16 @@ public class FoodFragment extends Fragment implements FoodRecyclerAdapter.FoodVi
             }
         });
 
+        MenuItem saveItem = menu.findItem(R.id.action_save);
+        saveItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                Intent intent = new Intent(getActivity(), SavedRecipeActivity.class);
+                startActivity(intent);
+                return true;
+            }
+        });
+
     }
 
     /**
@@ -200,7 +269,6 @@ public class FoodFragment extends Fragment implements FoodRecyclerAdapter.FoodVi
      */
     private void initRecycler(View view) {
         recyclerView = view.findViewById(R.id.food_recycler);
-//        recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         DividerItemDecoration itemDecorator = new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL);
         itemDecorator.setDrawable(ContextCompat.getDrawable(getContext(), R.drawable.divider_attribute));
@@ -212,13 +280,16 @@ public class FoodFragment extends Fragment implements FoodRecyclerAdapter.FoodVi
     @Override
     public void onFoodClicked(Food food) {
         Intent intent = new Intent(getContext(), RecipeActivity.class);
+        intent.putExtra("intentPath", "intentFromMainActivity");
         intent.putExtra("id", food.getMealId());
         startActivity(intent);
     }
 
     @Override
     public void onSaveClicked(Food food) {
-
+        foodViewModel.fetchRecipeForResult(food.getMealId());
+        foodIdForRetry = food.getMealId();
+        forAlertDialogAndSnackbar = true;
     }
 
 }

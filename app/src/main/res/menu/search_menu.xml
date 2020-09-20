@@ -12,7 +12,7 @@
     <item
         android:id="@+id/action_search"
         android:title="@string/searchTitle"
-        app:showAsAction="ifRoom|collapseActionView"
+        app:showAsAction="always|collapseActionView"
         android:icon="@drawable/search_icon"
         app:actionViewClass="androidx.appcompat.widget.SearchView">
 

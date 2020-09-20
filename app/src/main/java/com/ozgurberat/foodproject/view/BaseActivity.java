@@ -1,21 +1,10 @@
 package com.ozgurberat.foodproject.view;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SearchView;
-import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentContainerView;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavDirections;
-import androidx.navigation.Navigation;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -24,7 +13,7 @@ import com.ozgurberat.foodproject.R;
 import com.ozgurberat.foodproject.viewmodel.CategoryViewModel;
 import com.ozgurberat.foodproject.viewmodel.FoodViewModel;
 
-public class MainActivity extends AppCompatActivity {
+public class BaseActivity extends AppCompatActivity {
 
     private ProgressBar progressBar;
     private TextView timeout;
@@ -37,13 +26,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        progressBar = findViewById(R.id.main_progress_bar);
-        timeout = findViewById(R.id.main_timeout);
-
         categoryViewModel = new ViewModelProvider(this).get(CategoryViewModel.class);
         foodViewModel = new ViewModelProvider(this).get(FoodViewModel.class);
+
+        initViews();
         subscribeObservers();
 
+    }
+
+    private void initViews() {
+        progressBar = findViewById(R.id.main_progress_bar);
+        timeout = findViewById(R.id.main_timeout);
     }
 
     private void subscribeObservers() {

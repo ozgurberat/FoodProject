@@ -5,4 +5,5 @@
     <string name="searchTitle">Search</string>
     <string name="saved_recipes">Saved Recipes</string>
     <string name="error_message">Sorry. We couldn\'t find any recipes for your search.</string>
+    <string name="no_recipes">There is no saved recipes in repository.</string>
 </resources>

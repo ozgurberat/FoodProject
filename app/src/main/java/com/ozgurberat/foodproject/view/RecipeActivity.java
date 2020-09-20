@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.util.Linkify;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -44,18 +45,33 @@ public class RecipeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe);
 
+        recipeViewModel = new ViewModelProvider(this).get(RecipeViewModel.class);
+
+        initViews();
+
+        String id = getIntent().getStringExtra("id");
+        String path = getIntent().getStringExtra("intentPath");
+        switch (path) {
+            case "intentFromMainActivity" : {
+                recipeViewModel.fetchRecipe(id);
+                System.out.println("main");
+                break;
+            }
+            case "intentFromSavedRecipeActivity" : {
+                System.out.println("savedrecipes");
+                recipeViewModel.fetchRecipeFromSQLite(id);
+                break;
+            }
+        }
+        subscribeObservers();
+    }
+
+    private void initViews() {
         recipeImage = findViewById(R.id.recipe_image);
         progressBar = findViewById(R.id.recipe_progress_bar);
         recipeCollapsingToolbar = findViewById(R.id.recipe_collapsing_toolbar);
         recipeLinearLayout = findViewById(R.id.recipe_layout);
         timeout = findViewById(R.id.recipe_timeout);
-
-        recipeViewModel = new ViewModelProvider(this).get(RecipeViewModel.class);
-
-        String id = getIntent().getStringExtra("id");
-
-        recipeViewModel.fetchRecipe(id);
-        subscribeObservers();
     }
 
 
@@ -67,8 +83,6 @@ public class RecipeActivity extends AppCompatActivity {
             progressBar.setVisibility(View.GONE);
         }
     }
-
-
 
     private void setCollapsingToolbar(String title) {
         recipeCollapsingToolbar.setCollapsedTitleTextColor(Color.WHITE);
@@ -98,6 +112,16 @@ public class RecipeActivity extends AppCompatActivity {
             }
         });
 
+        recipeViewModel.getRecipeFromSQLite().observe(this, new Observer<Recipe>() {
+            @Override
+            public void onChanged(Recipe recipe) {
+                System.out.println(recipe);
+                List<Recipe> recipeList = new ArrayList<>();
+                recipeList.add(recipe);
+                RecipeResponse recipeResponse = new RecipeResponse(recipeList);
+                recipeViewModel.triggerGetRecipe(recipeResponse);
+            }
+        });
         recipeViewModel.getRecipe().observe(this, new Observer<RecipeResponse>() {
             @Override
             public void onChanged(RecipeResponse recipeResponse) {
