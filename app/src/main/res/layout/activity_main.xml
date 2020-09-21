@@ -38,7 +38,7 @@
             android:textColor="@color/BLACK"
             android:layout_gravity="center"
             android:visibility="gone"
-            android:text="Connection is too slow. Please try again...">
+            android:text="@string/too_slow">
 
         </TextView>
 

@@ -15,12 +15,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.ozgurberat.foodproject.R;
 import com.ozgurberat.foodproject.model.Food;
+import com.ozgurberat.foodproject.model.Recipe;
 import com.ozgurberat.foodproject.util.GlideHelper;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class FoodRecyclerAdapter extends RecyclerView.Adapter<FoodRecyclerAdapter.FoodCardViewHolder> {
+
 
     public interface FoodViewListener {
         void onFoodClicked(Food food);
@@ -73,7 +75,9 @@ public class FoodRecyclerAdapter extends RecyclerView.Adapter<FoodRecyclerAdapte
                 foodViewListener.onSaveClicked(foods.get(position));
             }
         });
+
     }
+
 
     @Override
     public int getItemCount() {

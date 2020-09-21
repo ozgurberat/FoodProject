@@ -36,8 +36,10 @@ import com.ozgurberat.foodproject.model.Food;
 import com.ozgurberat.foodproject.model.Recipe;
 import com.ozgurberat.foodproject.requests.responses.FoodResponse;
 import com.ozgurberat.foodproject.viewmodel.FoodViewModel;
+import com.ozgurberat.foodproject.viewmodel.SavedRecipeViewModel;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class FoodFragment extends Fragment implements FoodRecyclerAdapter.FoodViewListener {
     private static final String TAG = "FoodFragment";
@@ -162,6 +164,7 @@ public class FoodFragment extends Fragment implements FoodRecyclerAdapter.FoodVi
                         Snackbar snackbar = Snackbar.make(getView(),"SUCCESS!\nSaved: "+recipe.getMealName(), BaseTransientBottomBar.LENGTH_LONG);
                         snackbar.setTextColor(Color.CYAN);
                         snackbar.show();
+
                     }
 
                 }
@@ -290,6 +293,7 @@ public class FoodFragment extends Fragment implements FoodRecyclerAdapter.FoodVi
         foodViewModel.fetchRecipeForResult(food.getMealId());
         foodIdForRetry = food.getMealId();
         forAlertDialogAndSnackbar = true;
+
     }
 
 }

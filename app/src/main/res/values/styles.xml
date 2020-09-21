@@ -7,12 +7,17 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="TextAppearance" parent="TextAppearance.Design.CollapsingToolbar.Expanded">
+    <style name="AppLaunchTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/WHITE</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
 
+    <style name="TextAppearance" parent="TextAppearance.Design.CollapsingToolbar.Expanded">
         <item name="android:textSize">24sp</item>
         <item name="android:textColor">@color/WHITE</item>
         <item name="android:textStyle">bold</item>
-
     </style>
 
 </resources>

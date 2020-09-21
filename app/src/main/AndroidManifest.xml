@@ -12,19 +12,25 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
+
+        <activity
+            android:name=".util.SplashActivity"
+            android:theme="@style/AppLaunchTheme"
+            android:noHistory="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+        </activity>
         <activity
             android:name=".view.SavedRecipeActivity"
-            android:parentActivityName=".view.BaseActivity">
-        </activity>
+            android:parentActivityName=".view.BaseActivity" />
         <activity
             android:name=".view.RecipeActivity"
             android:parentActivityName=".view.BaseActivity" />
-        <activity android:name=".view.BaseActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+        <activity
+            android:name=".view.BaseActivity">
         </activity>
     </application>
 
