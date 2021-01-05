@@ -23,7 +23,7 @@
             <ImageView
                 android:id="@+id/recipe_image"
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
+                android:layout_height="@dimen/_200sdp"
                 android:background="@color/WHITE"
                 android:scaleType="fitXY">
 

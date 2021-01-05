@@ -16,7 +16,7 @@
                 android:id="@+id/category_toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:layout_margin="8dp"
+                android:layout_margin="@dimen/_6sdp"
                 android:background="@color/WHITE"
                 app:layout_scrollFlags="scroll|enterAlwaysCollapsed">
 
